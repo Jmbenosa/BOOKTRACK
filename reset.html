@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reset Password - Platonian's LibraryMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #2c3e50;
+            --green-accent: #27ae60;
+            --red: #e74c3c;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --bg-light: #ecf0f1;
+        }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .reset-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .reset-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .reset-header img {
+            width: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .reset-header h1 {
+            color: var(--text-dark);
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .reset-header p {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--green-accent);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+        
+        .password-strength {
+            font-size: 12px;
+            margin-top: 8px;
+            color: var(--text-light);
+        }
+        
+        .password-strength.weak { color: var(--red); }
+        .password-strength.medium { color: #f39c12; }
+        .password-strength.strong { color: var(--green-accent); }
+        
+        .btn-reset {
+            width: 100%;
+            padding: 12px;
+            background: var(--green-accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn-reset:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn-reset:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .message.error {
+            background: #fadbd8;
+            color: #922b21;
+            border: 1px solid #f5b7b1;
+            display: block;
+        }
+        
+        .message.success {
+            background: #d5f4e6;
+            color: #0b5345;
+            border: 1px solid #a9dfbf;
+            display: block;
+        }
+        
+        .message.info {
+            background: #d6eaf8;
+            color: #0c3483;
+            border: 1px solid #aed6f1;
+            display: block;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .back-link {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: inline-block;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .back-link:hover {
+            color: var(--text-dark);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="reset-container">
+        <a href="index.html" class="back-link">← Back to Login</a>
+        
+        <div class="reset-header">
+            <h1>Set New Password</h1>
+            <p>Please enter your new password below</p>
+        </div>
+        
+        <div id="reset-message" class="message"></div>
+        
+        <form id="reset-form" onsubmit="handlePasswordReset(event)">
+            <div class="form-group">
+                <label for="new-password">New Password *</label>
+                <input 
+                    type="password" 
+                    id="new-password" 
+                    placeholder="Enter new password" 
+                    required 
+                    minlength="6"
+                    oninput="checkPasswordStrength()"
+                />
+                <div class="password-strength" id="strength-indicator"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password *</label>
+                <input 
+                    type="password" 
+                    id="confirm-password" 
+                    placeholder="Re-enter password" 
+                    required 
+                    minlength="6"
+                />
+            </div>
+            
+            <button type="submit" class="btn-reset" id="submit-btn">
+                Reset Password
+            </button>
+        </form>
+        
+        <div class="footer">
+            &copy; 2026 Platonian's Library Management System
+        </div>
+    </div>
+    
+    <script>
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        function showMessage(message, type = 'info') {
+            const msgEl = document.getElementById('reset-message');
+            msgEl.textContent = message;
+            msgEl.className = 'message ' + type;
+        }
+        
+        function checkPasswordStrength() {
+            const password = document.getElementById('new-password').value;
+            const indicator = document.getElementById('strength-indicator');
+            
+            if (password.length === 0) {
+                indicator.innerHTML = '';
+                return;
+            }
+            
+            let strength = 'weak';
+            let text = 'Weak password';
+            
+            if (password.length >= 8) {
+                strength = 'medium';
+                text = 'Medium strength';
+                
+                if (/[a-z]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
+                    strength = 'strong';
+                    text = 'Strong password';
+                }
+            }
+            
+            indicator.className = 'password-strength ' + strength;
+            indicator.textContent = '💪 ' + text;
+        }
+        
+        async function handlePasswordReset(event) {
+            event.preventDefault();
+            
+            const token = getQueryParam('token');
+            if (!token) {
+                showMessage('Invalid or missing reset token', 'error');
+                return;
+            }
+            
+            const password = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Resetting...';
+            
+            try {
+                const response = await fetch('api/verify_token.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token: token,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('✓ Password reset successfully! Redirecting to login...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                } else {
+                    showMessage(data.message || 'Failed to reset password', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Reset Password';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('An error occurred. Please try again.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = 'Reset Password';
+            }
+        }
+        
+        // Check if we have a valid token
+        window.addEventListener('load', function() {
+            const token = getQueryParam('token');
+            if (!token) {
+                showMessage('No valid reset token provided. Please request a new password reset.', 'error');
+                document.getElementById('reset-form').style.display = 'none';
+            } else {
+                showMessage('Enter your new password below', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

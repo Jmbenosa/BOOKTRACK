@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Platonian's LibraryMS</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="library.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ═══ LOGIN PAGE ═══ -->
+<div id="login-page">
+
+  <!-- Left: Hero -->
+  <div class="login-hero">
+    <div class="login-hero-bg"></div>
+    <div class="login-hero-content">
+      <img src="upper.png" alt="Library Logo" class="hero-upper-img" />
+      <h1>BOOK TRACK</h1>
+      <p>Professional Library Management System for efficient book inventory, member management, and lending operations.</p>
+      <ul class="login-features">
+        <li>Complete Book Inventory &amp; CRUD</li>
+        <li>Member Registration &amp; History</li>
+        <li>Issue, Return &amp; Renewal</li>
+        <li>Reports &amp; CSV Export</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Right: Login panel -->
+  <div class="login-panel">
+    <div class="login-brand">
+      <div class="brand-icon">
+        <img src="booktrack.png" alt="BookTrack Logo" class="brand-logo-img" />
+      </div>
+      <div>
+        <div class="brand-name">BOOK TRACK</div>
+        <div class="brand-sub">Library Management System</div>
+      </div>
+    </div>
+
+    <!-- Role Selection View -->
+    <div id="role-selection-view">
+      <h2>Welcome</h2>
+      <p class="subtitle">Choose your role or search borrowing information</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin:24px 0">
+        <button class="quick-action-btn" onclick="showLoginForRole('superadmin')" style="border-color:var(--green-accent);color:var(--green-accent);font-weight:600">
+          👑 Super Admin
+        </button>
+        <button class="quick-action-btn" onclick="showLoginForRole('librarian')" style="border-color:var(--blue);color:var(--blue);font-weight:600">
+          📚 Librarian
+        </button>
+        <button class="quick-action-btn" onclick="showStudentSearch()" style="border-color:#a855f7;color:#a855f7;font-weight:600">
+          🔍 Student Search (No Login)
+        </button>
+      </div>
+      <div class="login-footer" style="margin-top:12px">&copy; 2026 Platonian's Library Management System</div>
+    </div>
+
+    <!-- Sign-in form -->
+    <div id="login-view" style="display:none">
+      <button class="back-link" onclick="showRoleSelection()" type="button">&#8592; Back to Role Selection</button>
+      <h2 id="login-title">Login</h2>
+      <p class="subtitle" id="login-subtitle">Sign in to access the management system</p>
+      <div class="form-group">
+        <label>Email Address</label>
+        <div class="input-wrap">
+          <span class="input-icon">&#128100;</span>
+          <input type="email" id="login-user" placeholder="Enter your email" autocomplete="username" />
+          <span style="font-size:10px;color:var(--text-muted);margin-top:4px;display:block">Must be a valid email address</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">&#128274;</span>
+          <input type="password" id="login-pass" placeholder="Enter password" autocomplete="current-password" />
+          <button class="eye-btn" onclick="togglePass()" type="button">&#128065;</button>
+        </div>
+      </div>
+      <div class="forgot-row"><a onclick="showForgot()">Forgot password?</a></div>
+      <button class="btn-primary" onclick="doLogin()">Sign In</button>
+      <div class="login-footer">&copy; 2026 Platonian's Library Management System</div>
+    </div>
+
+    <!-- Student Search View -->
+    <div id="student-search-view" style="display:none">
+      <button class="back-link" onclick="showRoleSelection()" type="button">&#8592; Back to Role Selection</button>
+      <h2>Check Your Borrowing Information</h2>
+      <p class="subtitle">Search your name to view borrowed books and due dates</p>
+      <div class="form-group">
+        <label>Your Full Name</label>
+        <div class="input-wrap">
+          <span class="search-icon">&#128269;</span>
+          <input type="text" id="student-search-name" placeholder="Enter your full name" oninput="searchStudentBorrowingInfo()" />
+        </div>
+      </div>
+      <div id="student-results" style="margin-top:16px;display:none">
+        <div class="panel" style="padding:0;overflow:hidden;max-height:400px;overflow-y:auto">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Book Title</th>
+                  <th>Author</th>
+                  <th>Issue Date</th>
+                  <th>Due Date</th>
+                  <th>Days Left</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="student-results-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div id="student-no-results" style="text-align:center;color:var(--text-muted);padding:32px;display:none;font-size:13px">
+        No borrowing records found. Start searching to see your borrowed books.
+      </div>
+      <div class="login-footer">&copy; 2026 Platonian's Library Management System</div>
+    </div>
+
+    <!-- Forgot password form -->
+    <div id="forgot-view">
+      <button class="back-link" onclick="showLogin()" type="button">&#8592; Back to Login</button>
+      <h2>Reset Password</h2>
+      <p class="subtitle">Enter your email and we'll send a reset link.</p>
+      <div id="forgot-success" class="forgot-success">
+        &#10003; A reset link has been sent to your email. Please check your inbox.
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <div class="input-wrap">
+          <span class="input-icon">&#9993;</span>
+          <input type="email" id="forgot-email" placeholder="Enter your email address" />
+        </div>
+      </div>
+      <button class="btn-primary" onclick="sendReset()">Send Reset Link</button>
+      <div class="login-footer">&copy; 2026 Platonian's Library Management System</div>
+    </div>
+
+  </div><!-- /login-panel -->
+</div><!-- /login-page -->
+
+<!-- ═══ APP SHELL ═══ -->
+<div id="app">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="app-layout">
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="s-icon">
+          <img src="booktrack.png" alt="BookTrack Logo" class="sidebar-logo-img" />
+        </div>
+        <div>
+          <div class="s-name">BOOK TRACK</div>
+          <div class="s-sub">Library Management System</div>
+        </div>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-avatar">A</div>
+        <div>
+          <div class="user-name" id="user-name">Admin Librarian</div>
+          <div class="user-role" id="user-role">Senior Librarian</div>
+        </div>
+      </div>
+      <div class="sidebar-label">Main Menu</div>
+      <button class="nav-item active" onclick="navigate('dashboard',this)"><span class="nav-icon">&#127968;</span> Dashboard</button>
+      <button class="nav-item" onclick="navigate('books',this)"><span class="nav-icon">&#128214;</span> Books</button>
+      <button class="nav-item" onclick="navigate('members',this)"><span class="nav-icon">&#128101;</span> Members</button>
+      <button class="nav-item" onclick="navigate('issues',this)">
+        <span class="nav-icon">&#8646;</span> Issue &amp; Return
+        <span class="nav-badge" id="nav-overdue-badge">0</span>
+      </button>
+      <button class="nav-item" onclick="navigate('reports',this)"><span class="nav-icon">&#128202;</span> Reports</button>
+      <button class="nav-item" onclick="navigate('settings',this)"><span class="nav-icon">&#9881;</span> Settings</button>
+      <div class="sidebar-bottom">
+        <button class="logout-btn" onclick="doLogout()">&#8617; Logout</button>
+      </div>
+    </nav>
+
+    <!-- Main area -->
+    <div class="main-area">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" onclick="openSidebar()" type="button">&#9776;</button>
+          <div class="topbar-welcome">Welcome back, <strong id="topbar-username">Admin Librarian</strong></div>
+        </div>
+        <div class="topbar-right">
+          <div class="overdue-badge" onclick="navigate('issues',document.querySelectorAll('.nav-item')[3])">
+            &#128276; <span id="topbar-overdue">0</span> Overdue
+          </div>
+          <div class="top-avatar">A</div>
+        </div>
+      </div>
+
+      <div class="page-content">
+
+        <!-- DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+          <div class="page-header">
+            <div>
+              <h1>Dashboard</h1>
+              <div class="page-sub" id="dash-date"></div>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-outline" onclick="openReturnModal()">&#8617; Return Book</button>
+              <button class="btn btn-green" onclick="openIssueModal()">+ Issue Book</button>
+            </div>
+          </div>
+
+          <!-- Stat Cards -->
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Total Books</div>
+                <div class="stat-value" id="stat-total-books">0</div>
+                <div class="stat-sub" id="stat-titles">0 titles</div>
+              </div>
+              <div class="stat-icon si-green">&#128209;</div>
+            </div>
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Issued Books</div>
+                <div class="stat-value" id="stat-issued">0</div>
+                <div class="stat-sub">Currently out</div>
+              </div>
+              <div class="stat-icon si-blue">&#128203;</div>
+            </div>
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Overdue Books</div>
+                <div class="stat-value" id="stat-overdue" style="color:var(--red)">0</div>
+                <div class="stat-sub">Need attention</div>
+              </div>
+              <div class="stat-icon si-red">&#9888;</div>
+            </div>
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Total Members</div>
+                <div class="stat-value" id="stat-members">0</div>
+                <div class="stat-sub" id="stat-students">0 students</div>
+              </div>
+              <div class="stat-icon si-purple">&#128101;</div>
+            </div>
+          </div>
+
+          <!-- Charts -->
+          <div class="chart-grid">
+            <div class="chart-card">
+              <div class="chart-title">Books by Category</div>
+              <div class="chart-sub">Total copies per category</div>
+              <div class="chart-wrap">
+                <canvas id="cat-chart"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Book Status</div>
+              <div class="chart-sub">Distribution by status</div>
+              <div class="chart-wrap">
+                <canvas id="status-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Issues + Member Overview -->
+          <div class="two-col">
+            <div class="panel">
+              <div class="panel-header">
+                <span class="panel-title">Active Issues</span>
+                <span class="panel-link" onclick="navigate('issues',document.querySelectorAll('.nav-item')[3])">View all &#8594;</span>
+              </div>
+              <div id="active-issues-list"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header">
+                <span class="panel-title">Member Overview</span>
+                <span class="panel-link" onclick="navigate('members',document.querySelectorAll('.nav-item')[2])">View &#8594;</span>
+              </div>
+              <div class="member-overview-grid">
+                <div class="mo-card blue">
+                  <div class="mo-value" id="mo-students" style="color:var(--blue)">0</div>
+                  <div class="mo-label">Students</div>
+                </div>
+                <div class="mo-card purple">
+                  <div class="mo-value" id="mo-faculty" style="color:#7c3aed">0</div>
+                  <div class="mo-label">Faculty</div>
+                </div>
+              </div>
+              <div class="panel-title" style="margin-bottom:12px">Quick Actions</div>
+              <button class="quick-action-btn" onclick="openIssueModal()">+ Issue a Book</button>
+              <button class="quick-action-btn" onclick="openReturnModal()">&#8617; Return a Book</button>
+              <button class="quick-action-btn" onclick="navigate('books',document.querySelectorAll('.nav-item')[1]);setTimeout(openAddBookModal,100)">&#128214; Add New Book</button>
+              <button class="quick-action-btn" onclick="navigate('members',document.querySelectorAll('.nav-item')[2]);setTimeout(openRegisterModal,100)">&#128100; Register Member</button>
+              <button class="quick-action-btn" onclick="navigate('reports',document.querySelectorAll('.nav-item')[4])">&#128202; View Reports</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOOKS -->
+        <div class="page" id="page-books">
+          <div class="page-header">
+            <div>
+              <h1>Book Management</h1>
+              <div class="page-sub" id="books-count-sub"></div>
+            </div>
+            <button class="btn btn-green" onclick="openAddBookModal()">+ Add New Book</button>
+          </div>
+          <div class="filter-bar">
+            <div class="search-input-wrap">
+              <span class="search-icon">&#128269;</span>
+              <input type="text" id="book-search" placeholder="Search by title, author, or ISBN..." oninput="renderBooksTable()" />
+            </div>
+            <select class="filter-select" id="book-cat-filter" onchange="renderBooksTable()">
+              <option value="">All Categories</option>
+            </select>
+            <select class="filter-select" id="book-status-filter" onchange="renderBooksTable()">
+              <option value="">All Statuses</option>
+              <option>Available</option>
+              <option>Issued</option>
+              <option>Lost</option>
+              <option>Damaged</option>
+            </select>
+          </div>
+          <div class="panel" style="padding:0;overflow:hidden">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ISBN</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Category</th>
+                    <th>Shelf</th>
+                    <th>Copies</th>
+                    <th>Available</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="books-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- MEMBERS -->
+        <div class="page" id="page-members">
+          <div class="page-header">
+            <div>
+              <h1>Member Management</h1>
+              <div class="page-sub" id="members-count-sub"></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-outline" onclick="triggerExcelImport()" title="Import Excel file with student names">
+                📥 Import Excel
+              </button>
+              <input type="file" id="excel-import" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelImport(event)" />
+              <button class="btn btn-green" onclick="openRegisterModal()">+ Register Member</button>
+            </div>
+          </div>
+          <div class="filter-bar">
+            <div class="search-input-wrap">
+              <span class="search-icon">&#128269;</span>
+              <input type="text" id="member-search" placeholder="Search by name or member ID..." oninput="renderMembersTable()" />
+            </div>
+            <select class="filter-select" id="member-type-filter" onchange="renderMembersTable()">
+              <option value="">All Types</option>
+              <option>Student</option>
+              <option>Faculty</option>
+            </select>
+          </div>
+          <div class="panel" style="padding:0;overflow:hidden">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Member ID</th>
+                    <th>Name &amp; Contact</th>
+                    <th>Type / Student Info</th>
+                    <th>Join Date</th>
+                    <th>Active</th>
+                    <th>Overdue</th>
+                    <th>Total Issued</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="members-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ISSUE & RETURN -->
+        <div class="page" id="page-issues">
+          <div class="page-header">
+            <div>
+              <h1>Issue &amp; Return</h1>
+              <div class="page-sub">Manage book loans and returns</div>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-outline" onclick="openReturnModal()">&#8617; Return Book</button>
+              <button class="btn btn-green" onclick="openIssueModal()">+ Issue Book</button>
+            </div>
+          </div>
+          <div class="ir-stats">
+            <div class="ir-stat">
+              <div class="ir-stat-icon" style="background:#eff6ff">&#128336;</div>
+              <div>
+                <div class="ir-stat-num" id="ir-active-count">0</div>
+                <div class="ir-stat-label">Currently Issued</div>
+              </div>
+            </div>
+            <div class="ir-stat">
+              <div class="ir-stat-icon" style="background:#fff0f0">&#9888;</div>
+              <div>
+                <div class="ir-stat-num" style="color:var(--red)" id="ir-overdue-count">0</div>
+                <div class="ir-stat-label">Overdue Books</div>
+              </div>
+            </div>
+            <div class="ir-stat">
+              <div class="ir-stat-icon" style="background:#e8f5f0">&#10003;</div>
+              <div>
+                <div class="ir-stat-num" id="ir-returned-count">0</div>
+                <div class="ir-stat-label">Total Returned</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel" style="padding:20px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+              <div class="tabs" id="issue-tabs">
+                <button class="tab-btn active" onclick="switchIssueTab('active',this)">
+                  Active <span class="tab-count" id="tab-active-count">0</span>
+                </button>
+                <button class="tab-btn" onclick="switchIssueTab('overdue',this)">
+                  Overdue <span class="tab-count" id="tab-overdue-count">0</span>
+                </button>
+                <button class="tab-btn" onclick="switchIssueTab('returned',this)">
+                  Returned <span class="tab-count" id="tab-returned-count">0</span>
+                </button>
+              </div>
+              <div class="search-input-wrap" style="max-width:240px">
+                <span class="search-icon">&#128269;</span>
+                <input type="text" id="issue-search" placeholder="Search issues..." oninput="renderIssuesTable()" />
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Issue ID</th>
+                    <th>Book Title</th>
+                    <th>Member</th>
+                    <th>Issue Date</th>
+                    <th>Due Date</th>
+                    <th>Days Left/Over</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="issues-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div class="page" id="page-reports">
+          <div class="page-header">
+            <div>
+              <h1>Reports</h1>
+              <div class="page-sub">Analytics and data exports</div>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-outline" onclick="window.print()">&#128424; Print / PDF</button>
+              <button class="btn btn-green" onclick="exportCSV()">&#8595; Export CSV</button>
+            </div>
+          </div>
+          <div class="reports-charts">
+            <div class="chart-card">
+              <div class="chart-title">Issues by Category</div>
+              <div class="chart-sub">Total issue count per book category</div>
+              <div class="chart-wrap">
+                <canvas id="rpt-cat-chart"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Monthly Issues (6 months)</div>
+              <div class="chart-sub">Issue trend over recent months</div>
+              <div class="chart-wrap">
+                <canvas id="rpt-monthly-chart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="report-panel">
+            <div class="report-panel-header">
+              <div class="tabs" style="background:none;border:none;padding:0">
+                <button class="tab-btn active" onclick="switchReportTab('issued',this)">
+                  Issued <span class="tab-count" id="rpt-tab-issued">0</span>
+                </button>
+                <button class="tab-btn" onclick="switchReportTab('overdue',this)">
+                  Overdue <span class="tab-count" id="rpt-tab-overdue">0</span>
+                </button>
+                <button class="tab-btn" onclick="switchReportTab('damaged',this)">
+                  Lost/Damaged <span class="tab-count" id="rpt-tab-damaged">0</span>
+                </button>
+                <button class="tab-btn" onclick="switchReportTab('history',this)">
+                  Full History <span class="tab-count" id="rpt-tab-history">0</span>
+                </button>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <div class="search-input-wrap" style="max-width:180px">
+                  <span class="search-icon">&#128269;</span>
+                  <input type="text" id="rpt-search" placeholder="Search..." oninput="renderReportTable()" />
+                </div>
+                <select class="filter-select" id="rpt-member-filter" onchange="renderReportTable()" style="min-width:180px">
+                  <option value="">All Members</option>
+                </select>
+                <div class="date-inputs">
+                  <input type="date" id="rpt-from" onchange="renderReportTable()" />
+                  <span style="color:var(--text-muted)">to</span>
+                  <input type="date" id="rpt-to" onchange="renderReportTable()" />
+                </div>
+              </div>
+            </div>
+            <div class="table-wrap" style="padding:0 0 8px">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Issue ID</th>
+                    <th>Book Title</th>
+                    <th>Member</th>
+                    <th>Issue Date</th>
+                    <th>Due Date</th>
+                    <th>Renewals</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="report-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="page" id="page-settings">
+          <div class="page-header">
+            <div>
+              <h1>System Settings</h1>
+              <div class="page-sub">Configure library rules and system preferences</div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <div class="settings-section-icon">&#128218;</div>
+              <div class="settings-section-title">Library Information</div>
+            </div>
+            <div class="settings-grid">
+              <div class="settings-full">
+                <label class="settings-label">Library Name</label>
+                <input class="settings-input" value="Don Servillano Platon Memorial High School" />
+              </div>
+              <div class="settings-full">
+                <label class="settings-label">Address</label>
+                <input class="settings-input" value="Sta Cruz St, Tinambac, Camarines Sur" />
+              </div>
+              <div>
+                <label class="settings-label">Phone</label>
+                <input class="settings-input" value="+63 (xxx) xxx-xxxx" />
+              </div>
+              <div>
+                <label class="settings-label">Email</label>
+                <input class="settings-input" value="library@dspmhns.edu.ph" />
+              </div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-section-header">
+              <div class="settings-section-icon">&#128336;</div>
+              <div class="settings-section-title">Loan Policy</div>
+            </div>
+            <div class="settings-grid three">
+              <div>
+                <label class="settings-label">Default Loan Duration (days)</label>
+                <input class="settings-input" id="default-loan-duration" type="number" value="14" />
+                <div class="settings-sub">Default borrowing period</div>
+              </div>
+              <div>
+                <label class="settings-label">Max Renewals</label>
+                <input class="settings-input" id="max-renewals" type="number" value="2" />
+                <div class="settings-sub">Per issue (0 = no renewals)</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <label class="settings-label">Loan Duration by Book Category</label>
+              <div class="settings-sub" style="margin-bottom:12px">Set custom loan duration for each category</div>
+              <div id="category-loan-durations" style="display:flex;flex-wrap:wrap;gap:10px"></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:4px">
+            <button class="btn btn-outline">Reset to Defaults</button>
+            <button class="btn btn-green" onclick="showToast('Settings saved!','success')">Save Settings</button>
+          </div>
+
+          <!-- Category Manager -->
+          <div class="settings-section" style="margin-top:24px">
+            <div class="settings-section-header">
+              <div class="settings-section-icon">&#127991;</div>
+              <div class="settings-section-title">Book Categories</div>
+            </div>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Add or remove categories used when adding books. Changes apply immediately to all dropdowns.</p>
+            <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+              <input class="settings-input" id="new-cat-input" placeholder="New category name..." style="max-width:280px"
+                onkeydown="if(event.key==='Enter')addCategory()" />
+              <button class="btn btn-green" onclick="addCategory()">+ Add Category</button>
+              <button class="btn btn-outline" onclick="resetCategories()" title="Reset to defaults" style="font-size:12px">&#8635; Reset Defaults</button>
+            </div>
+            <div id="cat-manager-list" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+          </div>
+        </div>
+
+      </div><!-- /page-content -->
+    </div><!-- /main-area -->
+  </div><!-- /app-layout -->
+</div><!-- /app -->
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Add Book Modal -->
+<div class="modal-overlay" id="add-book-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Book</div>
+      <button class="modal-close" onclick="closeModal('add-book-modal')">&#215;</button>
+    </div>
+    <div class="modal-grid">
+      <div>
+        <label class="modal-label">ISBN *</label>
+        <input class="modal-input" id="b-isbn" placeholder="978-0-00-000000-0" />
+      </div>
+      <div>
+        <label class="modal-label">Shelf Location</label>
+        <input class="modal-input" id="b-shelf" placeholder="e.g., A-01" />
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Title *</label>
+        <input class="modal-input" id="b-title" placeholder="Book title" />
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Author *</label>
+        <input class="modal-input" id="b-author" placeholder="Author name" />
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Category</label>
+        <select class="modal-select" id="b-cat">
+        </select>
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Total Copies</label>
+        <input class="modal-input" id="b-copies" type="number" value="1" min="1" />
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Description</label>
+        <textarea class="modal-textarea" id="b-desc" placeholder="Brief description..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('add-book-modal')">Cancel</button>
+      <button class="btn btn-green" onclick="addBook()">Add Book</button>
+    </div>
+  </div>
+</div>
+
+<!-- Register Member Modal -->
+<div class="modal-overlay" id="register-member-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Register New Member</div>
+      <button class="modal-close" onclick="closeModal('register-member-modal')">&#215;</button>
+    </div>
+    <div class="member-id-hint">Member ID will be auto-generated (e.g., LIB-2026-001)</div>
+    <div class="modal-grid">
+      <div class="modal-full">
+        <label class="modal-label">Full Name *</label>
+        <input class="modal-input" id="m-name" placeholder="Full name" />
+      </div>
+      <div>
+        <label class="modal-label">Email *</label>
+        <input class="modal-input" id="m-email" placeholder="email@example.com" />
+      </div>
+      <div>
+        <label class="modal-label">Phone</label>
+        <input class="modal-input" id="m-phone" placeholder="09xx-xxx-xxxx" />
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Address</label>
+        <input class="modal-input" id="m-address" placeholder="Street address, City" />
+      </div>
+      <div>
+        <label class="modal-label">Member Type</label>
+        <select class="modal-select" id="m-type" onchange="toggleStudentFields()">
+          <option>Student</option>
+          <option>Faculty</option>
+        </select>
+      </div>
+      <div>
+        <label class="modal-label">Join Date</label>
+        <input class="modal-input" type="date" id="m-join" />
+      </div>
+    </div>
+    <div class="student-info-section" id="student-fields">
+      <div class="student-info-title">&#9679; Student Information</div>
+      <div class="modal-grid">
+        <div class="modal-full">
+          <label class="modal-label">Student ID Number</label>
+          <input class="modal-input" id="m-sid" placeholder="e.g. STU-2026-001" />
+        </div>
+        <div>
+          <label class="modal-label">Grade</label>
+          <input class="modal-input" id="m-grade" placeholder="e.g. Grade 10" />
+        </div>
+        <div>
+          <label class="modal-label">Section</label>
+          <input class="modal-input" id="m-section" placeholder="e.g. Section A" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('register-member-modal')">Cancel</button>
+      <button class="btn btn-green" onclick="registerMember()">Register Member</button>
+    </div>
+  </div>
+</div>
+
+<!-- Issue Book Modal -->
+<div class="modal-overlay" id="issue-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">Issue Book</div>
+      <button class="modal-close" onclick="closeModal('issue-modal')">&#215;</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-full">
+        <label class="modal-label">Select Book *</label>
+        <select class="modal-select" id="i-book"></select>
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Select Member *</label>
+        <select class="modal-select" id="i-member"></select>
+      </div>
+      <div>
+        <label class="modal-label">Issue Date &amp; Time</label>
+        <input class="modal-input" type="datetime-local" id="i-date" />
+      </div>
+      <div>
+        <label class="modal-label">Due Date &amp; Time</label>
+        <input class="modal-input" type="datetime-local" id="i-due" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('issue-modal')">Cancel</button>
+      <button class="btn btn-green" onclick="issueBook()">Issue Book</button>
+    </div>
+  </div>
+</div>
+
+<!-- Return Book Modal -->
+<div class="modal-overlay" id="return-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">Return Book</div>
+      <button class="modal-close" onclick="closeModal('return-modal')">&#215;</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-full">
+        <label class="modal-label">Select Active Issue *</label>
+        <select class="modal-select" id="r-issue"></select>
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Condition on Return</label>
+        <select class="modal-select" id="r-condition">
+          <option>Good</option>
+          <option>Damaged</option>
+          <option>Lost</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('return-modal')">Cancel</button>
+      <button class="btn btn-green" onclick="confirmReturn()">Confirm Return</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Book Modal -->
+<div class="modal-overlay" id="edit-book-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Book</div>
+      <button class="modal-close" onclick="closeModal('edit-book-modal')">&#215;</button>
+    </div>
+    <input type="hidden" id="eb-id" />
+    <div class="modal-grid">
+      <div>
+        <label class="modal-label">ISBN *</label>
+        <input class="modal-input" id="eb-isbn" placeholder="978-0-00-000000-0" />
+      </div>
+      <div>
+        <label class="modal-label">Shelf Location</label>
+        <input class="modal-input" id="eb-shelf" placeholder="e.g., A-01" />
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Title *</label>
+        <input class="modal-input" id="eb-title" placeholder="Book title" />
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Author *</label>
+        <input class="modal-input" id="eb-author" placeholder="Author name" />
+      </div>
+      <div>
+        <label class="modal-label">Category</label>
+        <select class="modal-select" id="eb-cat">
+        </select>
+      </div>
+      <div>
+        <label class="modal-label">Status</label>
+        <select class="modal-select" id="eb-status">
+          <option>Available</option>
+          <option>Issued</option>
+          <option>Lost</option>
+          <option>Damaged</option>
+        </select>
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Total Copies</label>
+        <input class="modal-input" id="eb-copies" type="number" value="1" min="1" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('edit-book-modal')">Cancel</button>
+      <button class="btn btn-green" onclick="saveEditBook()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Member Modal -->
+<div class="modal-overlay" id="edit-member-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Member</div>
+      <button class="modal-close" onclick="closeModal('edit-member-modal')">&#215;</button>
+    </div>
+    <input type="hidden" id="em-id" />
+    <div class="modal-grid">
+      <div class="modal-full">
+        <label class="modal-label">Full Name *</label>
+        <input class="modal-input" id="em-name" placeholder="Full name" />
+      </div>
+      <div>
+        <label class="modal-label">Email *</label>
+        <input class="modal-input" id="em-email" placeholder="email@example.com" />
+      </div>
+      <div>
+        <label class="modal-label">Phone</label>
+        <input class="modal-input" id="em-phone" placeholder="09xx-xxx-xxxx" />
+      </div>
+      <div>
+        <label class="modal-label">Member Type</label>
+        <select class="modal-select" id="em-type" onchange="toggleEditStudentFields()">
+          <option>Student</option>
+          <option>Faculty</option>
+        </select>
+      </div>
+      <div>
+        <label class="modal-label">Join Date</label>
+        <input class="modal-input" type="date" id="em-join" />
+      </div>
+    </div>
+    <div class="student-info-section" id="edit-student-fields">
+      <div class="student-info-title">&#9679; Student Information</div>
+      <div class="modal-grid">
+        <div class="modal-full">
+          <label class="modal-label">Student ID Number</label>
+          <input class="modal-input" id="em-sid" placeholder="e.g. STU-2026-001" />
+        </div>
+        <div>
+          <label class="modal-label">Grade</label>
+          <input class="modal-input" id="em-grade" placeholder="e.g. Grade 10" />
+        </div>
+        <div>
+          <label class="modal-label">Section</label>
+          <input class="modal-input" id="em-section" placeholder="e.g. Section A" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('edit-member-modal')">Cancel</button>
+      <button class="btn btn-green" onclick="saveEditMember()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Member History Modal -->
+<div class="modal-overlay" id="member-history-modal">
+  <div class="modal" style="max-width:780px;width:95%">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="mh-title">Member History</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px" id="mh-meta"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('member-history-modal')">&#215;</button>
+    </div>
+    <div class="table-wrap" style="max-height:420px;overflow-y:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Issue ID</th>
+            <th>Book Title</th>
+            <th>Issue Date &amp; Time</th>
+            <th>Due Date &amp; Time</th>
+            <th>Return Date &amp; Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="mh-tbody"></tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-green" onclick="closeModal('member-history-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Super Admin Librarian Management Modal -->
+<div class="modal-overlay" id="librarian-management-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Manage Librarian Accounts</div>
+      <button class="modal-close" onclick="closeModal('librarian-management-modal')">&#215;</button>
+    </div>
+    <div style="margin-bottom:16px;padding:12px;background:var(--green-lighter);border-radius:8px;font-size:12px;color:var(--text-secondary)">
+      Super Admin, can create, edit, and manage librarian accounts.
+    </div>
+    <div style="margin-bottom:16px">
+      <button class="btn btn-green" onclick="openAddLibrarianModal()">+ Add New Librarian</button>
+    </div>
+    <div id="librarian-list" style="max-height:300px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- Add/Edit Librarian Modal -->
+<div class="modal-overlay" id="add-librarian-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title" id="librarian-modal-title">Add New Librarian</div>
+      <button class="modal-close" onclick="closeModal('add-librarian-modal')">&#215;</button>
+    </div>
+    <input type="hidden" id="librarian-edit-id" />
+    <div class="modal-grid">
+      <div class="modal-full">
+        <label class="modal-label">Full Name *</label>
+        <input class="modal-input" id="librarian-name" placeholder="Librarian name" />
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Email Address *</label>
+        <input class="modal-input" id="librarian-email" placeholder="email@example.com" type="email" />
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Password *</label>
+        <input class="modal-input" id="librarian-password" placeholder="Set password" type="password" />
+      </div>
+      <div class="modal-full">
+        <label class="modal-label">Confirm Password *</label>
+        <input class="modal-input" id="librarian-password-confirm" placeholder="Confirm password" type="password" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('add-librarian-modal')">Cancel</button>
+      <button class="btn btn-green" onclick="saveLibrarian()">Save Librarian</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js?v=2"></script>
+</body>
+</html>
