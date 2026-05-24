@@ -1,23 +1,9 @@
-/* ============================================================
-   Platonian's LibraryMS — app.js (MySQL Ready)
-   Database calls replaced with comments — ready for MySQL integration
-   ============================================================ */
-
-
-
-/* ── Configuration ────────────────────────────────────────── */
-
 var CURRENT_USER_ROLE = null; /* 'superadmin', 'librarian', or 'student' */
 var CURRENT_USER_ID = null;
-var loanDurationByCategory = {}; /* {categoryName: duration_in_days} */
-
-/* Authentication is handled by the backend auth endpoint. */
+var loanDurationByCategory = {}; 
 var librarianAccounts = [];
 
-
-/* ── Helpers ──────────────────────────────────────────────── */
-
-var TODAY = new Date(); /* updated on each overdue check */
+var TODAY = new Date(); 
 
 function fmt(d) {
   return new Date(d).toLocaleDateString('en-US', {
@@ -60,7 +46,7 @@ function showLoading(tbodyId, cols) {
 }
 
 
-/* ── Local cache (loaded from Supabase on login) ──────────── */
+//Local cache (loaded from Supabase on login) 
 
 var books   = [];
 var members = [];
@@ -70,7 +56,7 @@ var currentIssueTab  = 'active';
 var currentReportTab = 'issued';
 var catChart, statusChart, rptCatChart, rptMonthlyChart;
 
-/* ── Book Categories (custom, persisted in localStorage) ───── */
+//Book Categories 
 
 var DEFAULT_CATEGORIES = ['Fiction','Science','History','Technology','Self-Help','Mathematics','Philosophy','Literature'];
 var bookCategories = [];
@@ -94,19 +80,19 @@ function renderAllCategoryDropdowns() {
     return '<option value="' + c + '">' + c + '</option>';
   }).join('');
 
-  /* Add/Edit Book modals */
+  //Add/Edit Book modals
   var bCat = document.getElementById('b-cat');
   if (bCat) bCat.innerHTML = opts;
   var ebCat = document.getElementById('eb-cat');
   if (ebCat) ebCat.innerHTML = opts;
 
-  /* Books filter */
+  //Books filter 
   var filterCat = document.getElementById('book-cat-filter');
   if (filterCat) {
     filterCat.innerHTML = '<option value="">All Categories</option>' + opts;
   }
 
-  /* Category manager list in Settings */
+  //Category manager list in Settings
   renderCategoryManagerList();
 }
 
@@ -133,7 +119,7 @@ function addCategory() {
     showToast('Category already exists', 'error'); return;
   }
   bookCategories.push(name);
-  /* Ensure loan duration is initialized for the new category */
+  //Ensure loan duration is initialized for the new category 
   if (!loanDurationByCategory[name]) loanDurationByCategory[name] = 14;
   saveCategories();
   saveLoanDurations();
@@ -147,7 +133,6 @@ function deleteCategory(idx) {
   var name = bookCategories[idx];
   if (!confirm('Remove category "' + name + '"? Books assigned to it will keep their existing category label.')) return;
   bookCategories.splice(idx, 1);
-  /* Remove loan duration entry for removed category */
   try { delete loanDurationByCategory[name]; } catch(e) {}
   saveCategories();
   saveLoanDurations();
@@ -159,7 +144,6 @@ function deleteCategory(idx) {
 function resetCategories() {
   if (!confirm('Reset to default categories? Custom categories will be removed.')) return;
   bookCategories = DEFAULT_CATEGORIES.slice();
-  /* Re-initialize loan durations for defaults */
   var newDur = {};
   bookCategories.forEach(function(cat) { newDur[cat] = 14; });
   loanDurationByCategory = newDur;
@@ -171,16 +155,15 @@ function resetCategories() {
 }
 
 
-/* ── Loan Duration by Category ────────────────────────────── */
+//Loan Duration by Category 
 
 function loadLoanDurations() {
   try {
     var stored = localStorage.getItem('lms_loan_durations');
     loanDurationByCategory = stored ? JSON.parse(stored) : {};
-    /* Set default durations for all categories */
     bookCategories.forEach(function(cat) {
       if (!loanDurationByCategory[cat]) {
-        loanDurationByCategory[cat] = 14; /* default to 14 days */
+        loanDurationByCategory[cat] = 14; // default to 14 days load duration for books
       }
     });
     renderCategoryLoanDurations();
@@ -192,8 +175,6 @@ function loadLoanDurations() {
 function saveLoanDurations() {
   try {
     localStorage.setItem('lms_loan_durations', JSON.stringify(loanDurationByCategory));
-    /* Note: Loan durations are stored locally in localStorage. 
-       Consider adding a settings table to MySQL for future persistence. */
     showToast('Loan durations saved!', 'success');
   } catch(e) {
     console.error('Error saving loan durations:', e);
@@ -215,10 +196,6 @@ function renderCategoryLoanDurations() {
     '</div>';
   }).join('');
 }
-
-
-/* ── Supabase data mappers ────────────────────────────────── */
-/* Maps snake_case DB columns → camelCase JS fields           */
 
 function mapBook(row) {
   return {
@@ -285,7 +262,7 @@ function normalizeCachedIssue(row) {
 }
 
 
-/* ── Load all data ────────────────────────────────────────── */
+//Load all data 
 
 async function loadAllData() {
   try {
@@ -330,7 +307,7 @@ async function loadAllData() {
   }
 }
 
-/* Helper function to save data to localStorage (use MySQL in production) */
+//Helper function to save data to localStorage (use MySQL in production)
 function saveAllData() {
   try {
     localStorage.setItem('lms_data', JSON.stringify({books, members, issues}));
@@ -407,14 +384,13 @@ async function loadLibrarians() {
 }
 
 
-/* ── Auto-mark overdue issues ─────────────────────────────── */
+// Auto-mark overdue issues 
 async function checkAndUpdateOverdue() {
-  TODAY = new Date(); /* keep TODAY in sync */
+  TODAY = new Date(); // keep TODAY in sync
   var now = TODAY;
   var toUpdate = issues.filter(function(i) {
     if (i.status !== 'Active' && i.status !== 'Renewed') return false;
     var due = new Date(i.dueDate);
-    /* If dueDate is date-only string (no time part), treat as end of that day locally */
     if (i.dueDate && i.dueDate.length <= 10) {
       due = new Date(i.dueDate + 'T23:59:59');
     }
@@ -424,7 +400,7 @@ async function checkAndUpdateOverdue() {
   for (var i = 0; i < toUpdate.length; i++) {
     var issue = toUpdate[i];
     try {
-      /* Update issue status to Overdue in database */
+      //Update issue status to Overdue in database 
       await fetch('api/issues.php', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -434,7 +410,7 @@ async function checkAndUpdateOverdue() {
         })
       });
 
-      /* Update member overdue count */
+      // Update member overdue count 
       var member = members.find(function(m) { return m.id === issue.memberId; });
       if (member) {
         await fetch('api/members.php', {
@@ -460,9 +436,14 @@ async function checkAndUpdateOverdue() {
 }
 
 
-/* ── Navigation ───────────────────────────────────────────── */
+// Navigation 
 
 function navigate(page, btn) {
+  if (CURRENT_USER_ROLE === 'superadmin' && ['books','members','issues','settings'].includes(page)) {
+    showToast('Super Admin can only access dashboard, reports, and librarian management.', 'error');
+    return;
+  }
+
   document.querySelectorAll('.page').forEach(function(p) {
     p.classList.remove('active');
   });
@@ -472,7 +453,7 @@ function navigate(page, btn) {
   document.getElementById('page-' + page).classList.add('active');
   if (btn) btn.classList.add('active');
   closeSidebar();
-  /* Re-check overdue on every navigation so counters stay accurate */
+  //Re-check overdue on every navigation so counters stay accurate 
   checkAndUpdateOverdue().then(function() {
     if (page === 'books')   renderBooksTable();
     if (page === 'members') renderMembersTable();
@@ -496,7 +477,7 @@ function closeSidebar() {
 }
 
 
-/* ── Login / Auth ─────────────────────────────────────────── */
+// Login / Auth
 
 function showRoleSelection() {
   document.getElementById('role-selection-view').style.display = 'block';
@@ -541,7 +522,6 @@ async function showStudentSearch() {
   document.getElementById('student-no-results').style.display = 'none';
   document.getElementById('student-search-name').focus();
 
-  /* Ensure we have the latest members/issues from server so search works without login */
   try {
     await loadAllData();
     renderMembersTable();
@@ -574,7 +554,7 @@ function sendReset() {
   var originalText = btn ? btn.textContent : 'Send Reset Link';
   if (btn) btn.disabled = true;
   
-  /* Send email via backend */
+  // Send email via backend 
   fetch('api/reset_password.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -598,7 +578,7 @@ function sendReset() {
   });
 }
 
-/* Email validation */
+// Email validation 
 function isValidEmail(email) {
   var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
@@ -755,17 +735,59 @@ function updateSidebarForRole(role) {
 
   var sidebarBottom = document.querySelector('.sidebar-bottom');
   var existingMgmt = document.getElementById('nav-librarian-mgmt');
+  var navBooks = document.getElementById('nav-books');
+  var navMembers = document.getElementById('nav-members');
+  var navIssues = document.getElementById('nav-issues');
+  var navReports = document.getElementById('nav-reports');
+  var navSettings = document.getElementById('nav-settings');
+  var pageBooks = document.getElementById('page-books');
+  var pageMembers = document.getElementById('page-members');
+  var pageIssues = document.getElementById('page-issues');
+  var pageReports = document.getElementById('page-reports');
+  var pageSettings = document.getElementById('page-settings');
+  var activeIssuesPanel = document.getElementById('dashboard-active-issues-panel');
+  var topbarOverdue = document.getElementById('topbar-overdue-badge');
+  var dashActions = document.getElementById('dashboard-actions');
+  var dashQuickActions = document.getElementById('dashboard-quick-actions');
 
   if (role === 'superadmin') {
+    if (navBooks) navBooks.style.display = 'none';
+    if (navMembers) navMembers.style.display = 'none';
+    if (navIssues) navIssues.style.display = 'none';
+    if (navSettings) navSettings.style.display = 'none';
+    if (pageBooks) pageBooks.style.display = 'none';
+    if (pageMembers) pageMembers.style.display = 'none';
+    if (pageIssues) pageIssues.style.display = 'none';
+    if (pageSettings) pageSettings.style.display = 'none';
+    if (activeIssuesPanel) activeIssuesPanel.style.display = 'none';
+    if (topbarOverdue) topbarOverdue.style.display = '';
+    if (dashActions) dashActions.style.display = 'none';
+    if (dashQuickActions) dashQuickActions.style.display = 'none';
+
     if (!existingMgmt && sidebarBottom) {
       var li = document.createElement('button');
       li.id = 'nav-librarian-mgmt';
       li.className = 'nav-item';
-      li.innerHTML = '<span class="nav-icon">🔐</span> Manage Librarians';
+      li.innerHTML = '<span class="nav-icon">🔐</span> Account Management';
       li.onclick = function() { openModal('librarian-management-modal'); };
       sidebarBottom.parentNode.insertBefore(li, sidebarBottom);
     }
   } else {
+    if (navBooks) navBooks.style.display = '';
+    if (navMembers) navMembers.style.display = '';
+    if (navIssues) navIssues.style.display = '';
+    if (navReports) navReports.style.display = '';
+    if (navSettings) navSettings.style.display = '';
+    if (pageBooks) pageBooks.style.display = '';
+    if (pageMembers) pageMembers.style.display = '';
+    if (pageIssues) pageIssues.style.display = '';
+    if (pageReports) pageReports.style.display = '';
+    if (pageSettings) pageSettings.style.display = '';
+    if (activeIssuesPanel) activeIssuesPanel.style.display = '';
+    if (topbarOverdue) topbarOverdue.style.display = '';
+    if (dashActions) dashActions.style.display = '';
+    if (dashQuickActions) dashQuickActions.style.display = '';
+
     if (existingMgmt) {
       existingMgmt.remove();
     }
@@ -773,10 +795,10 @@ function updateSidebarForRole(role) {
 }
 
 
-/* ── Session / Inactivity ─────────────────────────────────── */
+// Session / Inactivity 
 
 var inactivityTimer = null;
-var INACTIVITY_LIMIT = 10 * 60 * 1000; /* 10 minutes in ms */
+var INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes in ms 
 
 function startInactivityTimer() {
   clearInactivityTimer();
@@ -798,12 +820,12 @@ function resetInactivityTimer() {
   startInactivityTimer();
 }
 
-/* Track user activity — any mouse move, click, or key press resets timer */
+// Track user activity — any mouse move, click, or key press resets timer 
 ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(function(evt) {
   document.addEventListener(evt, resetInactivityTimer, { passive: true });
 });
 
-/* Restore session on page refresh */
+// Restore session on page refresh 
 async function restoreSession() {
   var loggedIn   = sessionStorage.getItem('lms_logged_in');
   var lastActive = parseInt(sessionStorage.getItem('lms_last_active') || '0');
@@ -811,7 +833,6 @@ async function restoreSession() {
   var elapsed    = Date.now() - lastActive;
 
   if (loggedIn === 'true' && elapsed < INACTIVITY_LIMIT && role) {
-    /* Session still valid — restore it */
     showToast('Restoring session...', 'success');
     CURRENT_USER_ROLE = role;
     await loadAllData();
@@ -824,7 +845,7 @@ async function restoreSession() {
     initDashboard();
     startInactivityTimer();
   } else if (loggedIn === 'true') {
-    /* Session expired while away */
+    // Session expired while away 
     sessionStorage.removeItem('lms_logged_in');
     sessionStorage.removeItem('lms_last_active');
     sessionStorage.removeItem('lms_role');
@@ -836,7 +857,7 @@ async function restoreSession() {
 }
 
 
-/* ── Dashboard ────────────────────────────────────────────── */
+// Dashboard 
 
 function initDashboard() {
   var now = new Date();
@@ -862,7 +883,6 @@ function updateStats() {
   setText('stat-total-books',  totalCopies);
   setText('stat-titles',       books.length + ' titles');
   
-  /* CORRECTED LOGIC: Only count books actually held by a member */
   var currentlyIssued = issues.filter(function(i) { 
     return i.status === 'Active' || i.status === 'Renewed' || i.status === 'Overdue'; 
   }).length;
@@ -882,7 +902,7 @@ function updateStats() {
   setText('tab-overdue-count', overdueCount);
   setText('tab-returned-count', returnedCount);
   
-  /* Sync report counts */
+  // Sync report counts 
   setText('rpt-tab-issued',    currentlyIssued);
   setText('rpt-tab-overdue',   overdueCount);
   setText('rpt-tab-damaged',   books.filter(function(b) { return b.isLost || b.isDamaged; }).length);
@@ -980,8 +1000,7 @@ function initDashCharts() {
 }
 
 
-/* ── Books ────────────────────────────────────────────────── */
-
+// Books
 function renderBooksTable() {
   var q    = (document.getElementById('book-search')        || { value: '' }).value.toLowerCase();
   var cat  = (document.getElementById('book-cat-filter')    || { value: '' }).value;
@@ -1168,7 +1187,7 @@ async function saveEditBook() {
 }
 
 
-/* ── Members ──────────────────────────────────────────────── */
+// Members
 
 function renderMembersTable() {
   var q    = (document.getElementById('member-search')      || { value: '' }).value.toLowerCase();
@@ -1279,8 +1298,6 @@ async function handleExcelImport(event) {
       }
       var lines = text.split(/\r\n|\n|\r/);
       var importedCount = 0;
-
-      /* Detect and skip header row if first cell looks like a label */
       var startIndex = 0;
       if (lines.length > 0) {
         var firstCell = lines[0].split(',')[0].trim().toLowerCase().replace(/^"(.*)"$/, '$1');
@@ -1293,10 +1310,10 @@ async function handleExcelImport(event) {
         var line = lines[i];
         if (!line.trim()) continue;
 
-        /* Parse CSV row (handle quoted fields) */
+        // Parse CSV row (handle quoted fields)
         var cols = line.split(',').map(function(c) { return c.trim().replace(/^"(.*)"$/, '$1').trim(); });
 
-        /* Column layout: MemberID(0), FullName(1), Email(2), Phone(3), Address(4), Type(5), JoinDate(6), StudentID(7), Grade(8), Section(9) */
+        // Column layout: MemberID(0), FullName(1), Email(2), Phone(3), Address(4), Type(5), JoinDate(6), StudentID(7), Grade(8), Section(9) 
         var name    = cols[1] ? cols[1].replace(/^\uFEFF/, '').trim() : '';
         var email   = cols[2] || '';
         var phone   = cols[3] || '';
@@ -1308,18 +1325,18 @@ async function handleExcelImport(event) {
 
         if (!name || name.length < 2) continue;
 
-        /* Normalise type */
+        // Normalise type
         if (!['Student', 'Faculty', 'Staff'].includes(type)) type = 'Student';
 
-        /* Auto-generate email if missing */
+        // Auto-generate email if missing
         if (!email || !email.includes('@')) {
           email = name.replace(/\s+/g, '.').toLowerCase() + '@student.school.com';
         }
 
-        /* Check if member already exists */
+        // Check if member already exists
         if (members.find(function(m) { return m.name.toLowerCase() === name.toLowerCase(); })) continue;
 
-        /* Send to API to create member in database */
+        // Send to API to create member in database
         try {
           var response = await fetch('api/members.php', {
             method: 'POST',
@@ -1349,7 +1366,7 @@ async function handleExcelImport(event) {
       renderMembersTable();
       updateStats();
       showToast('Imported ' + importedCount + ' members from file!', 'success');
-      event.target.value = ''; /* reset input */
+      event.target.value = ''; // reset input
     } catch(err) {
       console.error('Error importing file:', err);
       showToast('Error importing file. Please check the format.', 'error');
@@ -1475,7 +1492,7 @@ async function saveEditMember() {
 }
 
 
-/* ── Super Admin: Librarian Management ────────────────────── */
+//Super Admin: Librarian Management 
 
 function openAddLibrarianModal() {
   document.getElementById('librarian-modal-title').textContent = 'Add New Librarian Account';
@@ -1758,7 +1775,7 @@ async function issueBook() {
       return;
     }
 
-    /* Also update book availability */
+    // Also update book availability
     await fetch('api/books.php', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -1769,7 +1786,7 @@ async function issueBook() {
       })
     });
 
-    /* Update member active count */
+    // Update member active count
     if (member) {
       await fetch('api/members.php', {
         method: 'PATCH',
@@ -1807,7 +1824,7 @@ async function confirmReturn() {
   var newStatus  = condition === 'Lost' ? 'Lost' : condition === 'Damaged' ? 'Damaged' : 'Returned';
 
   try {
-    /* Update issue with return info */
+    // Update issue with return info 
     var response = await fetch('api/issues.php', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -1825,7 +1842,7 @@ async function confirmReturn() {
       return;
     }
 
-    /* Update book availability */
+    // Update book availability 
     var book = books.find(function(b) { return b.id === issue.bookId; });
     if (book) {
       var updateData = { id: book.id };
@@ -1847,7 +1864,7 @@ async function confirmReturn() {
       });
     }
 
-    /* Update member active and overdue counts */
+    // Update member active and overdue counts 
     var member = members.find(function(m) { return m.id === issue.memberId; });
     if (member) {
       var newActive  = Math.max(0, member.active - 1);
@@ -1930,7 +1947,7 @@ async function quickReturn(id) {
 function returnBook() { confirmReturn(); }
 
 
-/* ── Reports ──────────────────────────────────────────────── */
+// Reports 
 
 function switchReportTab(tab, btn) {
   currentReportTab = tab;
@@ -2070,7 +2087,7 @@ function exportCSV() {
 }
 
 
-/* ── Modals ───────────────────────────────────────────────── */
+// Modals 
 
 function openAddBookModal() { openModal('add-book-modal'); }
 
@@ -2105,7 +2122,7 @@ function openIssueModal(bookId, memberId) {
   var now = new Date();
   document.getElementById('i-date').value = now.toISOString().slice(0, 16);
   var due = new Date(now);
-  /* Use category-based loan duration if available */
+  // Use category-based loan duration if available 
   var selectedBookId = parseInt(sel.value);
   var selectedBook = books.find(function(b) { return b.id === selectedBookId; });
   var loanDays = selectedBook && loanDurationByCategory[selectedBook.category]
@@ -2128,8 +2145,7 @@ function openReturnModal() {
 }
 
 
-/* ── Toast ────────────────────────────────────────────────── */
-
+// Toast
 function showToast(msg, type) {
   type = type || 'success';
   var t = document.createElement('div');
@@ -2140,7 +2156,7 @@ function showToast(msg, type) {
 }
 
 
-/* ── Init ─────────────────────────────────────────────────── */
+// Init 
 
 document.addEventListener('DOMContentLoaded', function() {
   loadLibrarians().catch(function() {
@@ -2158,7 +2174,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (lu) lu.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
   if (lp) lp.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
   
-  /* Allow student search enter key */
+  // Allow student search enter key 
   var ssn = document.getElementById('student-search-name');
   if (ssn) ssn.addEventListener('keydown', function(e) { if (e.key === 'Enter') searchStudentBorrowingInfo(); });
 });

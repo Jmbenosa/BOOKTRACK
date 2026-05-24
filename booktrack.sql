@@ -1,6 +1,13 @@
 CREATE DATABASE IF NOT EXISTS `booktrack` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `booktrack`;
 
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Role-based access summary:
+--   superadmin  → Dashboard (read-only stats) + Manage Librarians only; no Books/Members/Issue & Return/Settings access
+--   librarian   → Dashboard, Books, Members, Issue & Return, Reports, Settings
+--   student     → Self-service borrowing lookup
+-- ─────────────────────────────────────────────────────────────────────────────
+
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `email` VARCHAR(255) NOT NULL UNIQUE,
@@ -83,3 +90,24 @@ CREATE TABLE IF NOT EXISTS `password_resets` (
   INDEX (`email`),
   INDEX (`token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Default superadmin account
+--   Email    : platoniansbooktrack@gmail.com
+--   Password : BookTrack@#2026  (bcrypt hash below)
+-- Credentials are stored in the `users` table and verified via password_verify()
+-- in api/auth.php. No credentials are hardcoded in any application file.
+-- ─────────────────────────────────────────────────────────────────────────────
+INSERT IGNORE INTO `users` (`email`, `password`, `role`, `name`)
+VALUES (
+  'platoniansbooktrack@gmail.com',
+  '$2y$10$vFD6n1AiBxVzI1mddhB1fufXzH7YEAnL.n4HOwSSy1efYzLUFHaHC',
+  'superadmin',
+  'Super Admin'
+);
+
+-- If you are updating existing credentials, run this instead:
+-- UPDATE `users`
+-- SET `email` = 'platoniansbooktrack@gmail.com',
+--     `password` = '$2y$10$vFD6n1AiBxVzI1mddhB1fufXzH7YEAnL.n4HOwSSy1efYzLUFHaHC',
+--     `name` = 'Super Admin'
+-- WHERE `role` = 'superadmin';

@@ -1,4 +1,3 @@
-/* Platonian's LibraryMS — style.css */
 :root {
   --green-accent:  #2ec4a0;
   --green-mid:     #1d6a50;
@@ -30,7 +29,7 @@ body {
   min-height:100vh;
 }
 
-/* ── LOGIN ── */
+/*  LOGIN  */
 #login-page {
   display:flex;
   min-height:100vh;
@@ -340,7 +339,7 @@ body {
   line-height:1.6;
 }
 
-/* ── APP SHELL ── */
+/*  APP SHELL  */
 #app {
   display:none;
   height:100vh;
@@ -809,6 +808,10 @@ body {
   width:100%;
 }
 
+.two-col > .panel:only-child {
+  grid-column: 1 / -1;
+}
+
 .panel {
   background:#fff;
   border-radius:var(--radius);
@@ -864,7 +867,7 @@ body {
   margin-top:2px;
 }
 
-/* ── BADGES ── */
+/*  BADGES  */
 .badge {
   font-size:11px;
   font-weight:700;
@@ -925,7 +928,7 @@ body {
   color:#7c3aed;
 }
 
-/* ── MEMBER OVERVIEW ── */
+/*  MEMBER OVERVIEW  */
 .member-overview-grid {
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -963,7 +966,7 @@ body {
   margin-top:3px;
 }
 
-/* ── QUICK ACTIONS ── */
+/*  QUICK ACTIONS  */
 .quick-action-btn {
   display:flex;
   align-items:center;
@@ -989,7 +992,7 @@ body {
   color:#fff;
 }
 
-/* ── TABLE ── */
+/*  TABLE  */
 .table-wrap {
   overflow-x:auto;
   -webkit-overflow-scrolling:touch;
@@ -1084,7 +1087,7 @@ tbody tr:hover td {
   border-color:var(--green-accent);
 }
 
-/* ── FILTER BAR ── */
+/*  FILTER BAR  */
 .filter-bar {
   background:#fff;
   border:1px solid var(--border);
@@ -1143,7 +1146,7 @@ tbody tr:hover td {
   border-color:var(--green-accent);
 }
 
-/* ── ISSUE & RETURN ── */
+/*  ISSUE & RETURN  */
 .ir-stats {
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -1245,7 +1248,7 @@ tbody tr:hover td {
   font-weight:600;
 }
 
-/* ── REPORTS ── */
+/*  REPORTS  */
 .reports-charts {
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -1288,7 +1291,7 @@ tbody tr:hover td {
   outline:none;
 }
 
-/* ── SETTINGS ── */
+/*  SETTINGS  */
 .settings-section {
   background:#fff;
   border:1px solid var(--border);
@@ -1369,7 +1372,7 @@ tbody tr:hover td {
   margin-top:5px;
 }
 
-/* ── MODALS ── */
+/*  MODALS  */
 .modal-overlay {
   position:fixed;
   inset:0;
@@ -1513,7 +1516,7 @@ tbody tr:hover td {
   margin-bottom:14px;
 }
 
-/* ── TOAST ── */
+/*  TOAST  */
 #toast {
   position:fixed;
   bottom:20px;
@@ -1569,7 +1572,7 @@ tbody tr:hover td {
   color:var(--text-muted);
 }
 
-/* ── RESPONSIVE ── */
+/*  RESPONSIVE  */
 @media (max-width:1100px) {
   .stat-grid {
     grid-template-columns:repeat(2,1fr);
@@ -1674,7 +1677,7 @@ tbody tr:hover td {
     max-width:100%;
   }
 }
-/* ── Category Manager ── */
+/*  Category Manager  */
 .cat-item {
   display:inline-flex;
   align-items:center;

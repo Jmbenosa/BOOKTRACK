@@ -10,7 +10,7 @@
 </head>
 <body>
 
-<!-- ═══ LOGIN PAGE ═══ -->
+<!--  LOGIN PAGE -->
 <div id="login-page">
 
   <!-- Left: Hero -->
@@ -144,7 +144,7 @@
   </div><!-- /login-panel -->
 </div><!-- /login-page -->
 
-<!-- ═══ APP SHELL ═══ -->
+<!--  APP SHELL  -->
 <div id="app">
   <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
   <div class="app-layout">
@@ -168,15 +168,15 @@
         </div>
       </div>
       <div class="sidebar-label">Main Menu</div>
-      <button class="nav-item active" onclick="navigate('dashboard',this)"><span class="nav-icon">&#127968;</span> Dashboard</button>
-      <button class="nav-item" onclick="navigate('books',this)"><span class="nav-icon">&#128214;</span> Books</button>
-      <button class="nav-item" onclick="navigate('members',this)"><span class="nav-icon">&#128101;</span> Members</button>
-      <button class="nav-item" onclick="navigate('issues',this)">
+      <button class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard',this)"><span class="nav-icon">&#127968;</span> Dashboard</button>
+      <button class="nav-item" id="nav-books" onclick="navigate('books',this)"><span class="nav-icon">&#128214;</span> Books</button>
+      <button class="nav-item" id="nav-members" onclick="navigate('members',this)"><span class="nav-icon">&#128101;</span> Members</button>
+      <button class="nav-item" id="nav-issues" onclick="navigate('issues',this)">
         <span class="nav-icon">&#8646;</span> Issue &amp; Return
         <span class="nav-badge" id="nav-overdue-badge">0</span>
       </button>
-      <button class="nav-item" onclick="navigate('reports',this)"><span class="nav-icon">&#128202;</span> Reports</button>
-      <button class="nav-item" onclick="navigate('settings',this)"><span class="nav-icon">&#9881;</span> Settings</button>
+      <button class="nav-item" id="nav-reports" onclick="navigate('reports',this)"><span class="nav-icon">&#128202;</span> Reports</button>
+      <button class="nav-item" id="nav-settings" onclick="navigate('settings',this)"><span class="nav-icon">&#9881;</span> Settings</button>
       <div class="sidebar-bottom">
         <button class="logout-btn" onclick="doLogout()">&#8617; Logout</button>
       </div>
@@ -190,7 +190,7 @@
           <div class="topbar-welcome">Welcome back, <strong id="topbar-username">Admin Librarian</strong></div>
         </div>
         <div class="topbar-right">
-          <div class="overdue-badge" onclick="navigate('issues',document.querySelectorAll('.nav-item')[3])">
+          <div class="overdue-badge" id="topbar-overdue-badge" onclick="navigate('issues',document.getElementById('nav-issues'))">
             &#128276; <span id="topbar-overdue">0</span> Overdue
           </div>
           <div class="top-avatar">A</div>
@@ -206,7 +206,7 @@
               <h1>Dashboard</h1>
               <div class="page-sub" id="dash-date"></div>
             </div>
-            <div class="page-actions">
+            <div class="page-actions" id="dashboard-actions">
               <button class="btn btn-outline" onclick="openReturnModal()">&#8617; Return Book</button>
               <button class="btn btn-green" onclick="openIssueModal()">+ Issue Book</button>
             </div>
@@ -268,17 +268,16 @@
 
           <!-- Active Issues + Member Overview -->
           <div class="two-col">
-            <div class="panel">
+            <div class="panel" id="dashboard-active-issues-panel">
               <div class="panel-header">
                 <span class="panel-title">Active Issues</span>
-                <span class="panel-link" onclick="navigate('issues',document.querySelectorAll('.nav-item')[3])">View all &#8594;</span>
+                <span class="panel-link" onclick="navigate('issues',document.getElementById('nav-issues'))">View all &#8594;</span>
               </div>
               <div id="active-issues-list"></div>
             </div>
             <div class="panel">
               <div class="panel-header">
                 <span class="panel-title">Member Overview</span>
-                <span class="panel-link" onclick="navigate('members',document.querySelectorAll('.nav-item')[2])">View &#8594;</span>
               </div>
               <div class="member-overview-grid">
                 <div class="mo-card blue">
@@ -290,12 +289,6 @@
                   <div class="mo-label">Faculty</div>
                 </div>
               </div>
-              <div class="panel-title" style="margin-bottom:12px">Quick Actions</div>
-              <button class="quick-action-btn" onclick="openIssueModal()">+ Issue a Book</button>
-              <button class="quick-action-btn" onclick="openReturnModal()">&#8617; Return a Book</button>
-              <button class="quick-action-btn" onclick="navigate('books',document.querySelectorAll('.nav-item')[1]);setTimeout(openAddBookModal,100)">&#128214; Add New Book</button>
-              <button class="quick-action-btn" onclick="navigate('members',document.querySelectorAll('.nav-item')[2]);setTimeout(openRegisterModal,100)">&#128100; Register Member</button>
-              <button class="quick-action-btn" onclick="navigate('reports',document.querySelectorAll('.nav-item')[4])">&#128202; View Reports</button>
             </div>
           </div>
         </div>
@@ -627,7 +620,7 @@
   </div><!-- /app-layout -->
 </div><!-- /app -->
 
-<!-- ═══ MODALS ═══ -->
+<!--  MODALS  -->
 
 <!-- Add Book Modal -->
 <div class="modal-overlay" id="add-book-modal">
@@ -940,7 +933,8 @@
 <div class="modal-overlay" id="librarian-management-modal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">Manage Librarian Accounts</div>
+      <div class="modal-title">Librarian Accounts Management
+      </div>
       <button class="modal-close" onclick="closeModal('librarian-management-modal')">&#215;</button>
     </div>
     <div style="margin-bottom:16px;padding:12px;background:var(--green-lighter);border-radius:8px;font-size:12px;color:var(--text-secondary)">

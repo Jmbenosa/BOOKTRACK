@@ -1,0 +1,14 @@
+# ── Sensitive configuration — NEVER commit ───────────────────────────────────
+api/config.php
+
+# ── Runtime / environment ─────────────────────────────────────────────────────
+.env
+*.env
+
+# ── Composer / vendor ─────────────────────────────────────────────────────────
+api/vendor/
+
+# ── OS / editor noise ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
